@@ -1,4 +1,4 @@
-# Next Generation Movers: agent API (v0.4)
+# Next Generation Movers: agent API (v0.6.1)
 
 Nationwide interstate and long-distance household moves between any two US states, plus local moves in the DC/Maryland/Virginia area. Licensed carrier USDOT 3764697, MC 1341637.
 Lets AI agents get an **indicative price per tariff** (not a legal estimate) and send a **free booking request**. Runs on Cloudflare Workers (free tier). `/quote` is paid ($0.01) via x402 with the Coinbase (CDP) payment service and listed in the x402 Bazaar.
@@ -11,6 +11,16 @@ Lets AI agents get an **indicative price per tariff** (not a legal estimate) and
 | POST /book-deposit | free | Booking request. Saves it in KV, sends an alert, returns `date_hold_pending`: "the owners set the deposit and send the signed estimate". Never names a deposit amount |
 
 Every quote has `price_type: "indicative price per tariff"`, one total (no ranges), and a `handoff` to a free in-home or video survey and a written estimate.
+
+## Remote MCP server
+Endpoint: `https://ngm-agent-api.nextgenmovers.workers.dev/mcp` (streamable HTTP). Typical flow: `company_info` (optional), then `get_quote_free`, then `request_booking`.
+
+| Tool | Price | When to use it |
+|---|---|---|
+| `get_quote_free` | free | Use first for any US household move quote. Required: `from_zip`, `to_zip`, `move_date`; size with `cubic_feet`, `inventory`, `home_size` or `bedrooms`. Optional `contact_name` plus `contact_phone` or `contact_email` sends a callback lead to the owners; leave them out for a price only. 30 free quotes per hour per IP |
+| `get_quote` | $0.01 (x402, USDC on Base) | Same price and inputs as `get_quote_free`. Use only when the free tool is rate-limited or your agent pays per call. No contact fields, never creates a lead |
+| `request_booking` | free | After a quote, once a date is chosen. Required: `move_date` plus `contact_email` or `contact_phone`. Returns `date_hold_pending`; the owners make contact within 24 hours to schedule a free survey. No payment taken |
+| `company_info` | free | Licensing (USDOT/MC), coverage, hours and contact. No inputs, no price |
 
 ## Pricing (src/config/rates.ts; source: 2026 tariff)
 Long distance: billed cf (350 cf minimum; weight converts at 6.5 lb/cf) x band tariff rate, then the published -20% adjustment = line haul. Plus fuel 15% and origin/destination 7% of line haul.
