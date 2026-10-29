@@ -48,3 +48,7 @@ Local (DC/MD/VA only): 2 movers $229/hr, 3 movers $259/hr, 4 movers $299/hr, 3-h
 
 ## Commands
 `npm test` · `npm run dev` (test network, no money) · `npm run mcp`
+
+## License
+
+MIT, see [LICENSE](LICENSE). The license does not cover the name "Next Generation Movers" or its logo, which remain trademarks of Next Generation Movers.
